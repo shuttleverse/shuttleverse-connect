@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttleverse-connect
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttleverse-connect
+  template:
+    metadata:
+      labels:
+        app: shuttleverse-connect
+    spec:
+      containers:
+        - name: shuttleverse-connect
+          image: docker-user/shuttleverse-connect:latest
+          ports:
+            - containerPort: 8084
+          env:
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_SECRET_KEY
+            - name: SHUTTLEVERSE_CONNECT_DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shuttleverse-connect-db-url
+                  key: SHUTTLEVERSE_CONNECT_DB_URL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shuttleverse-connect
+  namespace: default
+spec:
+  selector:
+    app: shuttleverse-connect
+  ports:
+    - port: 8084
+      targetPort: 8084
+  type: ClusterIP

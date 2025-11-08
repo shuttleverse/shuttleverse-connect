@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: shuttleverse-connect
+  datasource:
+    url: ${SHUTTLEVERSE_CONNECT_DB_URL}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 0
+      idle-timeout: 10000
+      max-lifetime: 300000
+      connection-timeout: 30000
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+server:
+  servlet:
+    context-path: /api/connect
+  port: 8084
+
+eureka:
+  client:
+    service-url:
+      defaultZone: "http://shuttleverse-service-discovery:8761/eureka/"
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+jwt:
+  secret: ${JWT_SECRET_KEY:-${TEST_JWT_SECRET_KEY}}
+
+user:
+  service:
+    name: shuttleverse-community
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
