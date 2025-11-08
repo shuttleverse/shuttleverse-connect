@@ -14,7 +14,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Runtime image
-FROM --platform=linux/arm64 openjdk:17-jdk-slim
+FROM --platform=linux/arm64 eclipse-temurin:17-jdk-jammy
 
 WORKDIR /app
 
