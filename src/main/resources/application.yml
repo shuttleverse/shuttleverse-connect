@@ -38,6 +38,13 @@ user:
   service:
     name: shuttleverse-community
 
+push:
+  notifications:
+    vapid:
+      public-key: ${VAPID_PUBLIC_KEY:}
+      private-key: ${VAPID_PRIVATE_KEY:}
+      subject: mailto:shuttleverse.team@gmail.com
+
 feign:
   client:
     config:
