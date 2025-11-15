@@ -29,6 +29,16 @@ spec:
                 secretKeyRef:
                   name: shuttleverse-connect-db-url
                   key: SHUTTLEVERSE_CONNECT_DB_URL
+            - name: VAPID_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: vapid-private-key
+                  key: VAPID_PRIVATE_KEY
+            - name: VAPID_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: vapid-public-key
+                  key: VAPID_PUBLIC_KEY
 ---
 apiVersion: v1
 kind: Service
