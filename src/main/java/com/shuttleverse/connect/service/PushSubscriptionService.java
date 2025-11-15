@@ -20,9 +20,6 @@ public class PushSubscriptionService {
 
   private final PushSubscriptionRepository subscriptionRepository;
 
-  /**
-   * Subscribe user to push notifications If endpoint already exists, updates the subscription
-   */
   @Transactional
   public PushSubscriptionResponse subscribe(UUID userId, PushSubscriptionRequest request) {
     Optional<PushSubscription> existing = subscriptionRepository.findByEndpoint(
@@ -31,21 +28,24 @@ public class PushSubscriptionService {
     if (existing.isPresent()) {
       PushSubscription subscription = existing.get();
 
-      // Verify it belongs to this user
       if (!subscription.getUserId().equals(userId)) {
-        throw new IllegalStateException("Subscription endpoint already exists for another user");
+        log.warn(
+            "Subscription endpoint {} exists for user {} but current user is {}. "
+                + "Transferring ownership (likely from previous session that wasn't cleaned up).",
+            request.getEndpoint(), subscription.getUserId(), userId);
+
+        subscriptionRepository.deleteByEndpoint(request.getEndpoint());
+      } else {
+        subscription.setP256dh(request.getKeys().getP256dh());
+        subscription.setAuth(request.getKeys().getAuth());
+        subscription.setUserAgent(request.getUserAgent());
+        subscription.setDeviceType(detectDeviceType(request.getUserAgent()));
+
+        subscription = subscriptionRepository.save(subscription);
+        log.info("Updated push subscription for user: {}, endpoint: {}", userId,
+            request.getEndpoint());
+        return convertToResponse(subscription);
       }
-
-      // Update existing subscription (keys might have changed)
-      subscription.setP256dh(request.getKeys().getP256dh());
-      subscription.setAuth(request.getKeys().getAuth());
-      subscription.setUserAgent(request.getUserAgent());
-      subscription.setDeviceType(detectDeviceType(request.getUserAgent()));
-
-      subscription = subscriptionRepository.save(subscription);
-      log.info("Updated push subscription for user: {}, endpoint: {}", userId,
-          request.getEndpoint());
-      return convertToResponse(subscription);
     }
 
     PushSubscription subscription = PushSubscription.builder()
@@ -113,4 +113,3 @@ public class PushSubscriptionService {
         .build();
   }
 }
-
