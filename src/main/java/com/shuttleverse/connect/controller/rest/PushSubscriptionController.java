@@ -21,16 +21,17 @@ import java.util.UUID;
 public class PushSubscriptionController {
 
     private final PushSubscriptionService subscriptionService;
+    private final com.shuttleverse.connect.config.PushNotificationConfig pushConfig;
 
     @PostMapping("/subscribe")
     public ResponseEntity<SVApiResponse<PushSubscriptionResponse>> subscribe(
             @Valid @RequestBody PushSubscriptionRequest request) {
         String userIdStr = UserContext.getCurrentUserId();
         UUID userId = UserIdConverter.toUuid(userIdStr);
-        
+
         PushSubscriptionResponse response = subscriptionService.subscribe(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(SVApiResponse.success(response));
+                .body(SVApiResponse.success(response));
     }
 
     @DeleteMapping("/unsubscribe")
@@ -44,7 +45,7 @@ public class PushSubscriptionController {
     public ResponseEntity<SVApiResponse<Void>> unsubscribeAll() {
         String userIdStr = UserContext.getCurrentUserId();
         UUID userId = UserIdConverter.toUuid(userIdStr);
-        
+
         subscriptionService.unsubscribeUser(userId);
         return ResponseEntity.ok(SVApiResponse.success("Unsubscribed from all devices", null));
     }
@@ -53,9 +54,13 @@ public class PushSubscriptionController {
     public ResponseEntity<SVApiResponse<List<PushSubscriptionResponse>>> getSubscriptions() {
         String userIdStr = UserContext.getCurrentUserId();
         UUID userId = UserIdConverter.toUuid(userIdStr);
-        
+
         List<PushSubscriptionResponse> subscriptions = subscriptionService.getUserSubscriptions(userId);
         return ResponseEntity.ok(SVApiResponse.success(subscriptions));
     }
-}
 
+    @GetMapping("/vapid-public-key")
+    public ResponseEntity<SVApiResponse<String>> getVapidPublicKey() {
+        return ResponseEntity.ok(SVApiResponse.success(pushConfig.getPublicKey()));
+    }
+}
