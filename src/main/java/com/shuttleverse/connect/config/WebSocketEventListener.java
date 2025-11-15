@@ -11,7 +11,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
-import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 @Component
 public class WebSocketEventListener {
@@ -51,18 +50,6 @@ public class WebSocketEventListener {
     if (userId != null) {
       sessionService.removeSession(sessionId);
       logger.info("User disconnected: {} with session: {}", userId, sessionId);
-    }
-  }
-
-  @EventListener
-  public void handleWebSocketSubscribeListener(SessionSubscribeEvent event) {
-    StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-    String sessionId = headerAccessor.getSessionId();
-    String destination = headerAccessor.getDestination();
-
-    UUID userId = sessionService.getUserIdFromSession(sessionId);
-    if (userId != null && destination != null) {
-      logger.info("User {} subscribed to: {} with session: {}", userId, destination, sessionId);
     }
   }
 }
